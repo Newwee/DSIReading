@@ -23,10 +23,11 @@ import {
   ArrowUp,
   X
 } from 'lucide-react';
-import { StudyTopic, CategoryId, FlaggedItem } from '../types';
+import { StudyTopic, CategoryId, FlaggedItem, ProgramId } from '../types';
 import { CATEGORIES, STUDY_TOPICS, getTopicById } from '../data/studyContent';
 import { FlagModal } from '../components/FlagModal';
 import { MarkdownRenderer } from '../components/ui/MarkdownRenderer';
+import AnimatedContent from '../components/ui/AnimatedContent';
 
 interface ReadingPageViewProps {
   currentTopicId?: string;
@@ -48,6 +49,8 @@ interface ReadingPageViewProps {
   onChangeReadingWidth: (width: 'compact' | 'standard' | 'wide') => void;
   isZenMode?: boolean;
   onToggleZenMode?: () => void;
+  topics?: StudyTopic[];
+  activeProgram?: ProgramId;
 }
 
 export const ReadingPageView: React.FC<ReadingPageViewProps> = ({
@@ -70,8 +73,11 @@ export const ReadingPageView: React.FC<ReadingPageViewProps> = ({
   onChangeReadingWidth,
   isZenMode = false,
   onToggleZenMode,
+  topics,
+  activeProgram = 'DSI',
 }) => {
-  const activeTopic: StudyTopic = (currentTopicId && getTopicById(currentTopicId)) || STUDY_TOPICS[0];
+  const allTopics = (topics && topics.length > 0) ? topics : STUDY_TOPICS;
+  const activeTopic: StudyTopic = (currentTopicId && (allTopics.find(t => t.id === currentTopicId) || getTopicById(currentTopicId))) || allTopics[0];
 
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSectionId, setActiveSectionId] = useState<string>('');
@@ -146,9 +152,9 @@ export const ReadingPageView: React.FC<ReadingPageViewProps> = ({
     setTimeout(() => setCopiedSectionId(null), 2000);
   };
 
-  const currentIndex = STUDY_TOPICS.findIndex(t => t.id === activeTopic.id);
-  const prevTopic = currentIndex > 0 ? STUDY_TOPICS[currentIndex - 1] : null;
-  const nextTopic = currentIndex < STUDY_TOPICS.length - 1 ? STUDY_TOPICS[currentIndex + 1] : null;
+  const currentIndex = allTopics.findIndex(t => t.id === activeTopic.id);
+  const prevTopic = currentIndex > 0 ? allTopics[currentIndex - 1] : null;
+  const nextTopic = currentIndex < allTopics.length - 1 ? allTopics[currentIndex + 1] : null;
 
   const widthClasses = {
     compact: 'max-w-2xl',
@@ -180,28 +186,30 @@ export const ReadingPageView: React.FC<ReadingPageViewProps> = ({
         />
       </div>
 
-      {/* Mobile Sub-Header Floating Controls */}
+      {/* Mobile Sub-Header Controls (Slides up with page naturally, not sticky) */}
       {!isZenMode && (
-        <div className="lg:hidden sticky top-16 z-20 glass-panel px-4 py-2.5 flex items-center justify-between border-b border-[var(--border-color)]">
-          <button
-            onClick={() => setLeftSidebarOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-primary)] min-h-[38px]"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-[#FF6B00]" />
-            <span>บทที่ ({activeTopic.lessonNumber}/{STUDY_TOPICS.length})</span>
-          </button>
+        <div className="lg:hidden max-w-[1600px] mx-auto px-4 sm:px-6 pt-3 pb-2 mb-1">
+          <div className="p-2.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between shadow-sm">
+            <button
+              onClick={() => setLeftSidebarOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-primary)] min-h-[38px] active:scale-95 transition-transform"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-[#FF6B00]" />
+              <span>บทที่ ({activeTopic.lessonNumber}/{allTopics.length})</span>
+            </button>
 
-          <span className="text-xs font-mono text-[#FF6B00] font-bold">
-            {scrollProgress}%
-          </span>
+            <span className="text-xs font-mono text-[#FF6B00] font-bold">
+              {scrollProgress}%
+            </span>
 
-          <button
-            onClick={() => setRightTocOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-primary)] min-h-[38px]"
-          >
-            <ListOrdered className="w-3.5 h-3.5 text-[#35D5F2]" />
-            <span>สารบัญหัวข้อ</span>
-          </button>
+            <button
+              onClick={() => setRightTocOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-primary)] min-h-[38px] active:scale-95 transition-transform"
+            >
+              <ListOrdered className="w-3.5 h-3.5 text-[#35D5F2]" />
+              <span>สารบัญหัวข้อ</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -221,15 +229,15 @@ export const ReadingPageView: React.FC<ReadingPageViewProps> = ({
               <div className="p-4 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                    สารบัญบทเรียน
+                    สารบัญบทเรียน ({activeProgram})
                   </span>
                   <span className="text-xs px-2 py-0.5 rounded-full bg-[#FF6B00]/15 font-bold text-[#FF8A33]">
-                    {STUDY_TOPICS.length} บท
+                    {allTopics.length} บท
                   </span>
                 </div>
 
                 <div className="space-y-1.5">
-                  {STUDY_TOPICS.map(topic => {
+                  {allTopics.map(topic => {
                     const isCurrent = topic.id === activeTopic.id;
                     const isDone = isCompleted(topic.id);
                     return (
@@ -655,13 +663,13 @@ export const ReadingPageView: React.FC<ReadingPageViewProps> = ({
           <div onClick={() => setLeftSidebarOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="fixed inset-y-0 left-0 w-4/5 max-w-sm bg-[var(--bg-card)] border-r border-[var(--border-color)] p-5 space-y-4 overflow-y-auto animate-fade-in z-10">
             <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
-              <span className="text-sm font-bold text-[var(--text-primary)]">เลือกบทเรียน ({STUDY_TOPICS.length} บท)</span>
+              <span className="text-sm font-bold text-[var(--text-primary)]">เลือกบทเรียน ({allTopics.length} บท)</span>
               <button onClick={() => setLeftSidebarOpen(false)} className="p-1 rounded-lg hover:bg-[var(--bg-elevated)]">
                 <X className="w-4 h-4 text-[var(--text-muted)]" />
               </button>
             </div>
             <div className="space-y-1.5">
-              {STUDY_TOPICS.map(topic => (
+              {allTopics.map(topic => (
                 <button
                   key={topic.id}
                   onClick={() => {

@@ -12,7 +12,8 @@ import {
   Filter
 } from 'lucide-react';
 import { STUDY_TOPICS, CATEGORIES } from '../data/studyContent';
-import { CategoryId, StudyTopic } from '../types';
+import { CategoryId, StudyTopic, ProgramId } from '../types';
+import AnimatedContent from '../components/ui/AnimatedContent';
 
 interface StudyLibraryViewProps {
   onOpenTopic: (topicId: string) => void;
@@ -22,6 +23,8 @@ interface StudyLibraryViewProps {
   isCompleted: (id: string) => boolean;
   isFlagged: (id: string) => boolean;
   onToggleBookmark: (id: string) => void;
+  topics?: StudyTopic[];
+  activeProgram?: ProgramId;
 }
 
 export const StudyLibraryView: React.FC<StudyLibraryViewProps> = ({
@@ -32,11 +35,14 @@ export const StudyLibraryView: React.FC<StudyLibraryViewProps> = ({
   isCompleted,
   isFlagged,
   onToggleBookmark,
+  topics,
+  activeProgram = 'DSI',
 }) => {
+  const allTopics = (topics && topics.length > 0) ? topics : STUDY_TOPICS;
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'uncompleted' | 'bookmarked'>('all');
 
-  const filteredTopics = STUDY_TOPICS.filter(topic => {
+  const filteredTopics = allTopics.filter(topic => {
     // Category match
     if (selectedCategory !== 'all' && topic.category !== selectedCategory) {
       return false;
@@ -63,22 +69,31 @@ export const StudyLibraryView: React.FC<StudyLibraryViewProps> = ({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
       
       {/* Header */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#FF6B00]/15 text-[#FF8A33] border border-[#FF6B00]/30">
-                คลังบทเรียนครบวงจร ({STUDY_TOPICS.length} บท)
-              </span>
+      <AnimatedContent distance={40} direction="vertical" duration={0.6} trigger="mount">
+        <div className="p-6 sm:p-8 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#FF6B00]/15 text-[#FF8A33] border border-[#FF6B00]/30">
+                  คลังบทเรียนหลักสูตร {activeProgram} ({allTopics.length} บท)
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
+                {activeProgram === 'IT' 
+                  ? 'คลังเนื้อหาเตรียมสอบ IT (วท.บ. เทคโนโลยีสารสนเทศ) SIT มจธ.'
+                  : activeProgram === 'CS'
+                  ? 'คลังเนื้อหาเตรียมสอบ CS (วท.บ. วิทยาการคอมพิวเตอร์) SIT มจธ.'
+                  : 'คลังเนื้อหาเตรียมสอบสมรรถนะเทคโนโลยีดิจิทัล (DSI)'}
+              </h1>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl">
+                {activeProgram === 'IT'
+                  ? 'สรุปเนื้อหาลึก 5 บทตามคู่มือสอบทางการ: Computer Hardware, OS, Number Systems, SDLC, Databases, Networks, Cloud & Cybersecurity'
+                  : activeProgram === 'CS'
+                  ? 'สรุปเนื้อหาลึก 5 บทตามคู่มือสอบทางการ: Discrete Math & Logic, Data Structures, Algorithms & Big-O, AI/ML, Software Engineering & OOP'
+                  : 'เรียงลำดับจากพื้นฐานสู่ขั้นประยุกต์ ครอบคลุม RAID, Algorithm, Big-O, Network, Cloud, Cybersecurity, Digital Literacy และ Logical Thinking'}
+              </p>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
-              คลังเนื้อหาเตรียมสอบสมรรถนะเทคโนโลยีดิจิทัล
-            </h1>
-            <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl">
-              เรียงลำดับจากพื้นฐานสู่ขั้นประยุกต์ ครอบคลุม RAID, Algorithm, Big-O, Network, Cloud, Cybersecurity, Digital Literacy และ Logical Thinking
-            </p>
           </div>
-        </div>
 
         {/* Search & Filter Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-3 border-t border-[var(--border-color)]">
@@ -133,7 +148,7 @@ export const StudyLibraryView: React.FC<StudyLibraryViewProps> = ({
                 : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
             }`}
           >
-            ทุกหมวดหมู่ ({STUDY_TOPICS.length})
+            ทุกหมวดหมู่ ({allTopics.length})
           </button>
           {CATEGORIES.map(cat => (
             <button
@@ -150,9 +165,11 @@ export const StudyLibraryView: React.FC<StudyLibraryViewProps> = ({
           ))}
         </div>
       </div>
+      </AnimatedContent>
 
       {/* Topics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <AnimatedContent distance={30} direction="vertical" duration={0.6} stagger={0.06}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {filteredTopics.map(topic => {
           const completed = isCompleted(topic.id);
           const bookmarked = isBookmarked(topic.id);
@@ -242,6 +259,7 @@ export const StudyLibraryView: React.FC<StudyLibraryViewProps> = ({
           );
         })}
       </div>
+      </AnimatedContent>
     </div>
   );
 };

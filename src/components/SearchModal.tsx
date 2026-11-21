@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, BookOpen, ArrowRight, FileText, HelpCircle, Flame } from 'lucide-react';
 import { STUDY_TOPICS } from '../data/studyContent';
+import { IT_STUDY_TOPICS } from '../data/itStudyContent';
+import { CS_STUDY_TOPICS } from '../data/csStudyContent';
 import { PRACTICE_QUESTIONS } from '../data/practiceQuestions';
+import { IT_PRACTICE_QUESTIONS } from '../data/itPracticeQuestions';
+import { CS_PRACTICE_QUESTIONS } from '../data/csPracticeQuestions';
 import { CHEAT_SHEET_TRAPS } from '../data/summaryCheatSheet';
+
+const ALL_SEARCH_TOPICS = [...STUDY_TOPICS, ...IT_STUDY_TOPICS, ...CS_STUDY_TOPICS];
+const ALL_SEARCH_QUESTIONS = [...PRACTICE_QUESTIONS, ...IT_PRACTICE_QUESTIONS, ...CS_PRACTICE_QUESTIONS];
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -32,9 +39,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         if (isOpen) onClose();
-        else {
-          // Trigger open
-        }
       }
       if (e.key === 'Escape' && isOpen) {
         onClose();
@@ -49,7 +53,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   const cleanQuery = query.trim().toLowerCase();
 
   // Search in topics & sections
-  const matchedTopics = !cleanQuery ? [] : STUDY_TOPICS.filter(t => 
+  const matchedTopics = !cleanQuery ? [] : ALL_SEARCH_TOPICS.filter(t => 
     t.title.toLowerCase().includes(cleanQuery) ||
     t.description.toLowerCase().includes(cleanQuery) ||
     t.tags.some(tag => tag.toLowerCase().includes(cleanQuery)) ||
@@ -57,7 +61,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   ).slice(0, 5);
 
   // Search in Questions
-  const matchedQuestions = !cleanQuery ? [] : PRACTICE_QUESTIONS.filter(q =>
+  const matchedQuestions = !cleanQuery ? [] : ALL_SEARCH_QUESTIONS.filter(q =>
     q.question.toLowerCase().includes(cleanQuery) ||
     q.keyConcept.toLowerCase().includes(cleanQuery) ||
     q.explanation.toLowerCase().includes(cleanQuery)

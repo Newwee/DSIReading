@@ -15,6 +15,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { CHEAT_SHEET_TRAPS, QUICK_FORMULAS } from '../data/summaryCheatSheet';
+import AnimatedContent from '../components/ui/AnimatedContent';
 
 export const CheatSheetView: React.FC = () => {
   // Interactive RAID Calculator State
@@ -102,20 +103,22 @@ export const CheatSheetView: React.FC = () => {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10 animate-fade-in">
       
       {/* Header */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-elevated)] to-[var(--bg-card)] border border-[var(--border-color)] space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#FF6B00]/15 text-[#FF8A33] border border-[#FF6B00]/30 flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5" />
-            <span>สรุปจุดจำเร็ว 1 หน้า & กับดักข้อสอบ</span>
-          </span>
+      <AnimatedContent distance={40} direction="vertical" duration={0.6} trigger="mount">
+        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-elevated)] to-[var(--bg-card)] border border-[var(--border-color)] space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#FF6B00]/15 text-[#FF8A33] border border-[#FF6B00]/30 flex items-center gap-1.5">
+              <Flame className="w-3.5 h-3.5" />
+              <span>สรุปจุดจำเร็ว 1 หน้า & กับดักข้อสอบ</span>
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
+            สูตรคำนวณ & ตารางเทียบจุดที่มักสับสน (Exam Traps)
+          </h1>
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl">
+            รวบรวมเครื่องมือจำลองคำนวณสด ทั้ง 8-Bit Converter, RAID, Binary Search และ 10 กับดักข้อสอบสำคัญ ป้องกันการตอบผิดจากความสับสน
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
-          สูตรคำนวณ & ตารางเทียบจุดที่มักสับสน (Exam Traps)
-        </h1>
-        <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl">
-          รวบรวมเครื่องมือจำลองคำนวณสด ทั้ง 8-Bit Converter, RAID, Binary Search และ 10 กับดักข้อสอบสำคัญ ป้องกันการตอบผิดจากความสับสน
-        </p>
-      </div>
+      </AnimatedContent>
 
       {/* TOOL 1: Interactive 8-Bit Octet & Base Converter */}
       <section className="p-6 sm:p-8 rounded-3xl bg-[var(--bg-card)] border-2 border-[#35D5F2]/30 space-y-6 shadow-lg shadow-[#35D5F2]/5 relative overflow-hidden">

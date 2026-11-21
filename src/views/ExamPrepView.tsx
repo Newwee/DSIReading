@@ -19,8 +19,9 @@ import {
   getFourPillarsQuestions,
   getBinaryQuestions
 } from '../data/practiceQuestions';
-import { PracticeQuestion, CategoryId, FlaggedItem } from '../types';
+import { PracticeQuestion, CategoryId, FlaggedItem, ProgramId } from '../types';
 import { FlagModal } from '../components/FlagModal';
+import AnimatedContent from '../components/ui/AnimatedContent';
 
 interface ExamPrepViewProps {
   onSelectTab?: (tab: any) => void;
@@ -28,6 +29,8 @@ interface ExamPrepViewProps {
   getFlagNote: (id: string) => string;
   onSaveFlag: (item: Omit<FlaggedItem, 'timestamp'>) => void;
   onRemoveFlag: (id: string) => void;
+  questions?: PracticeQuestion[];
+  activeProgram?: ProgramId;
 }
 
 export const ExamPrepView: React.FC<ExamPrepViewProps> = ({
@@ -36,6 +39,8 @@ export const ExamPrepView: React.FC<ExamPrepViewProps> = ({
   getFlagNote,
   onSaveFlag,
   onRemoveFlag,
+  questions,
+  activeProgram = 'DSI',
 }) => {
   const [filterMode, setFilterMode] = useState<'all' | '4pillars' | 'binary' | 'docx' | 'flagged'>('all');
   const [selectedCategory, setSelectedCategory] = useState<CategoryId | 'all'>('all');
@@ -56,17 +61,26 @@ export const ExamPrepView: React.FC<ExamPrepViewProps> = ({
     isFlagged: boolean;
   } | null>(null);
 
-  // Filter questions
-  let displayedQuestions = PRACTICE_QUESTIONS;
+  const isDSI = activeProgram === 'DSI';
+  const baseQuestions = (questions && questions.length > 0) ? questions : PRACTICE_QUESTIONS;
 
-  if (filterMode === 'docx') {
-    displayedQuestions = getOfficialDocxQuestions();
-  } else if (filterMode === '4pillars') {
-    displayedQuestions = getFourPillarsQuestions();
-  } else if (filterMode === 'binary') {
-    displayedQuestions = getBinaryQuestions();
-  } else if (filterMode === 'flagged') {
-    displayedQuestions = PRACTICE_QUESTIONS.filter(q => isFlagged(`quiz_${q.id}`));
+  // Filter questions
+  let displayedQuestions = baseQuestions;
+
+  if (isDSI) {
+    if (filterMode === 'docx') {
+      displayedQuestions = getOfficialDocxQuestions();
+    } else if (filterMode === '4pillars') {
+      displayedQuestions = getFourPillarsQuestions();
+    } else if (filterMode === 'binary') {
+      displayedQuestions = getBinaryQuestions();
+    } else if (filterMode === 'flagged') {
+      displayedQuestions = baseQuestions.filter(q => isFlagged(`quiz_${q.id}`));
+    }
+  } else {
+    if (filterMode === 'flagged') {
+      displayedQuestions = baseQuestions.filter(q => isFlagged(`quiz_${q.id}`));
+    }
   }
 
   if (selectedCategory !== 'all') {
@@ -101,108 +115,118 @@ export const ExamPrepView: React.FC<ExamPrepViewProps> = ({
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
       
       {/* Top Hero Banner */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-elevated)] to-[var(--bg-card)] border border-[var(--border-color)] shadow-sm space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#FF6B00]/15 text-[#FF8A33] border border-[#FF6B00]/30">
-                ระบบฝึกทำข้อสอบออนไลน์
-              </span>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#35D5F2]/15 text-[#35D5F2] border border-[#35D5F2]/30">
-                เกณฑ์ผ่าน ≥ 50%
-              </span>
+      <AnimatedContent distance={40} direction="vertical" duration={0.6} trigger="mount">
+        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-elevated)] to-[var(--bg-card)] border border-[var(--border-color)] shadow-sm space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#FF6B00]/15 text-[#FF8A33] border border-[#FF6B00]/30">
+                  ระบบฝึกทำข้อสอบออนไลน์ ({activeProgram})
+                </span>
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#35D5F2]/15 text-[#35D5F2] border border-[#35D5F2]/30">
+                  เกณฑ์ผ่าน ≥ 50%
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
+                {isDSI
+                  ? 'แบบทดสอบประเมินสมรรถนะดิจิทัล (Digital Test Prep)'
+                  : `แบบทดสอบเตรียมความพร้อม ${activeProgram} (Official Manual)`}
+              </h1>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl">
+                {isDSI
+                  ? 'รวมข้อสอบ 150 ข้อเข้มข้น ครอบคลุม Docx ทางการ, 4 เสาหลัก, และการแปลงเลขฐาน 2 & 8-Bit พร้อมคำอธิบายเหตุผลและเฉลยละเอียด'
+                  : `ข้อสอบจำลอง 15 ข้อทางการจากคู่มือเตรียมความพร้อม ${activeProgram} (SIT มจธ.) พร้อมคำอธิบายและเฉลยละเอียดทุกข้อ`}
+              </p>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
-              แบบทดสอบประเมินสมรรถนะดิจิทัล (Digital Test Prep)
-            </h1>
-            <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl">
-              รวมข้อสอบ 25 ข้อเข้มข้นจากคู่มือทบทวนสอบ Docx และแบบทดสอบเสมือนจริงทุกเสาหลัก พร้อมคำอธิบายเหตุผลและเฉลยละเอียด
-            </p>
+
+            {/* Reset button */}
+            <button
+              onClick={handleResetQuiz}
+              className="p-2.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[#FF6B00] hover:border-[#FF6B00]/40 transition-all flex items-center gap-2 text-xs font-semibold"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>ทำใหม่ทั้งหมด</span>
+            </button>
           </div>
 
-          {/* Reset button */}
-          <button
-            onClick={handleResetQuiz}
-            className="p-2.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[#FF6B00] hover:border-[#FF6B00]/40 transition-all flex items-center gap-2 text-xs font-semibold"
-          >
-            <RotateCcw className="w-4 h-4" />
-            <span>ทำใหม่ทั้งหมด</span>
-          </button>
-        </div>
+          {/* Score & Progress Stats Card */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-[var(--border-color)]">
+            <div className="p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
+              <span className="text-[11px] text-[var(--text-muted)] font-medium">ข้อสอบทั้งหมด</span>
+              <div className="text-xl font-black text-[var(--text-primary)] mt-1">{totalQuestions} ข้อ</div>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
+              <span className="text-[11px] text-[var(--text-muted)] font-medium">ทำแล้ว</span>
+              <div className="text-xl font-black text-[#35D5F2] mt-1">{answeredCount} / {totalQuestions}</div>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
+              <span className="text-[11px] text-[var(--text-muted)] font-medium">ตอบถูก</span>
+              <div className="text-xl font-black text-emerald-400 mt-1">{correctCount} ข้อ</div>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
+              <span className="text-[11px] text-[var(--text-muted)] font-medium">คะแนนประเมิน</span>
+              <div className={`text-xl font-black mt-1 flex items-center gap-1.5 ${isPassed ? 'text-emerald-400' : 'text-amber-400'}`}>
+                <span>{scorePercent}%</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--bg-elevated)] font-bold">
+                  {isPassed ? 'ผ่านเกณฑ์' : 'ต่ำกว่า 50%'}
+                </span>
+              </div>
+            </div>
+          </div>
 
-        {/* Score & Progress Stats Card */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-[var(--border-color)]">
-          <div className="p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
-            <span className="text-[11px] text-[var(--text-muted)] font-medium">ข้อสอบทั้งหมด</span>
-            <div className="text-xl font-black text-[var(--text-primary)] mt-1">{totalQuestions} ข้อ</div>
-          </div>
-          <div className="p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
-            <span className="text-[11px] text-[var(--text-muted)] font-medium">ทำแล้ว</span>
-            <div className="text-xl font-black text-[#35D5F2] mt-1">{answeredCount} / {totalQuestions}</div>
-          </div>
-          <div className="p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
-            <span className="text-[11px] text-[var(--text-muted)] font-medium">ตอบถูก</span>
-            <div className="text-xl font-black text-emerald-400 mt-1">{correctCount} ข้อ</div>
-          </div>
-          <div className="p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)]">
-            <span className="text-[11px] text-[var(--text-muted)] font-medium">คะแนนประเมิน</span>
-            <div className={`text-xl font-black mt-1 flex items-center gap-1.5 ${isPassed ? 'text-emerald-400' : 'text-amber-400'}`}>
-              <span>{scorePercent}%</span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--bg-elevated)] font-bold">
-                {isPassed ? 'ผ่านเกณฑ์' : 'ต่ำกว่า 50%'}
-              </span>
+          {/* Filter Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            {/* Main filter mode */}
+            <div className="flex flex-wrap items-center rounded-2xl bg-[var(--bg-card)] p-1 border border-[var(--border-color)] gap-1">
+              <button
+                onClick={() => setFilterMode('all')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  filterMode === 'all' ? 'bg-[#FF6B00] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                ทั้งหมด ({baseQuestions.length} ข้อ)
+              </button>
+              {isDSI && (
+                <>
+                  <button
+                    onClick={() => setFilterMode('4pillars')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      filterMode === '4pillars' ? 'bg-[#FF6B00] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    4 เสาหลัก (80 ข้อ)
+                  </button>
+                  <button
+                    onClick={() => setFilterMode('binary')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      filterMode === 'binary' ? 'bg-[#35D5F2] text-black font-extrabold shadow-sm' : 'text-[var(--text-muted)] hover:text-[#35D5F2]'
+                    }`}
+                  >
+                    เลขฐาน 2 & 8-Bit (15 ข้อ)
+                  </button>
+                  <button
+                    onClick={() => setFilterMode('docx')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      filterMode === 'docx' ? 'bg-[#FF6B00] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    ข้อสอบทางการ 25 ข้อ (Docx)
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => setFilterMode('flagged')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
+                  filterMode === 'flagged' ? 'bg-red-500 text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-red-400'
+                }`}
+              >
+                <Flag className="w-3 h-3" />
+                <span>เฉพาะข้อที่ติดธง 🚩</span>
+              </button>
             </div>
           </div>
         </div>
-
-        {/* Filter Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          {/* Main filter mode */}
-          <div className="flex flex-wrap items-center rounded-2xl bg-[var(--bg-card)] p-1 border border-[var(--border-color)] gap-1">
-            <button
-              onClick={() => setFilterMode('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                filterMode === 'all' ? 'bg-[#FF6B00] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              ทั้งหมด ({PRACTICE_QUESTIONS.length} ข้อ)
-            </button>
-            <button
-              onClick={() => setFilterMode('4pillars')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                filterMode === '4pillars' ? 'bg-[#FF6B00] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              4 เสาหลัก (80 ข้อ)
-            </button>
-            <button
-              onClick={() => setFilterMode('binary')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                filterMode === 'binary' ? 'bg-[#35D5F2] text-black font-extrabold shadow-sm' : 'text-[var(--text-muted)] hover:text-[#35D5F2]'
-              }`}
-            >
-              เลขฐาน 2 & 8-Bit (15 ข้อ)
-            </button>
-            <button
-              onClick={() => setFilterMode('docx')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                filterMode === 'docx' ? 'bg-[#FF6B00] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              ข้อสอบทางการ 25 ข้อ (Docx)
-            </button>
-            <button
-              onClick={() => setFilterMode('flagged')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
-                filterMode === 'flagged' ? 'bg-red-500 text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-red-400'
-              }`}
-            >
-              <Flag className="w-3 h-3" />
-              <span>เฉพาะข้อที่ติดธง 🚩</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      </AnimatedContent>
 
       {/* Empty State when no questions */}
       {displayedQuestions.length === 0 && (
@@ -216,7 +240,8 @@ export const ExamPrepView: React.FC<ExamPrepViewProps> = ({
       )}
 
       {/* Questions List */}
-      <div className="space-y-6">
+      <AnimatedContent distance={30} direction="vertical" duration={0.6} stagger={0.06}>
+        <div className="space-y-6">
         {displayedQuestions.map((q, qIndex) => {
           const userAnswer = userAnswers[q.id];
           const isAnswered = userAnswer !== undefined;
@@ -373,6 +398,7 @@ export const ExamPrepView: React.FC<ExamPrepViewProps> = ({
           );
         })}
       </div>
+      </AnimatedContent>
 
       {/* Flag Modal Component */}
       <FlagModal

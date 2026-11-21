@@ -23,7 +23,8 @@ import { PRACTICE_QUESTIONS } from '../data/practiceQuestions';
 import { RECRUITMENT_TIMELINE, SIT_PROGRAMS } from '../data/sitActiveRecruitmentData';
 import { CHEAT_SHEET_TRAPS } from '../data/summaryCheatSheet';
 import { NavTab } from '../components/Header';
-import { CategoryId } from '../types';
+import { CategoryId, ProgramId, StudyTopic } from '../types';
+import AnimatedContent from '../components/ui/AnimatedContent';
 
 interface HomeViewProps {
   onSelectTab: (tab: NavTab) => void;
@@ -34,6 +35,10 @@ interface HomeViewProps {
   flaggedCount: number;
   lastReadTopicId?: string;
   onOpenSlidesModal: () => void;
+  activeProgram?: ProgramId;
+  onSelectProgram?: (prog: ProgramId) => void;
+  topics?: StudyTopic[];
+  questionsCount?: number;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -45,9 +50,26 @@ export const HomeView: React.FC<HomeViewProps> = ({
   flaggedCount = 0,
   lastReadTopicId,
   onOpenSlidesModal,
+  activeProgram = 'DSI',
+  onSelectProgram,
+  topics,
+  questionsCount,
 }) => {
-  const lastReadTopic = lastReadTopicId ? getTopicById(lastReadTopicId) : STUDY_TOPICS[0];
-  const progressPercent = Math.round((completedIds.length / STUDY_TOPICS.length) * 100);
+  const allTopics = (topics && topics.length > 0) ? topics : STUDY_TOPICS;
+  const lastReadTopic = lastReadTopicId 
+    ? (allTopics.find(t => t.id === lastReadTopicId) || getTopicById(lastReadTopicId) || allTopics[0]) 
+    : allTopics[0];
+  const progressPercent = Math.round((completedIds.length / allTopics.length) * 100);
+  const totalQuestions = questionsCount || PRACTICE_QUESTIONS.length;
+
+  const isIT = activeProgram === 'IT';
+  const isCS = activeProgram === 'CS';
+  const programAccentColor = isIT ? 'from-[#00D2D3] to-[#35D5F2]' : isCS ? 'from-[#8B7CFF] to-[#A78BFA]' : 'from-[#FF6B00] via-[#FF8A33] to-[#35D5F2]';
+  const programBadge = isIT 
+    ? 'คู่มือเตรียมสอบทางการ IT (วท.บ. เทคโนโลยีสารสนเทศ) SIT มจธ.' 
+    : isCS 
+    ? 'คู่มือเตรียมสอบทางการ CS (English Program) SIT มจธ.' 
+    : 'โครงการ Active Recruitment SIT มจธ. ปีการศึกษา 2570';
 
   const pillarCards: {
     id: CategoryId;
@@ -115,80 +137,88 @@ export const HomeView: React.FC<HomeViewProps> = ({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10 animate-fade-in">
       
       {/* Hero Welcome Card */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#121A2F] via-[#0F172A] to-[#0A0F1D] border border-[var(--border-color)] p-6 sm:p-10 shadow-2xl">
-        <div className="relative z-10 max-w-3xl space-y-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#FF6B00]/20 text-[#FF8A33] border border-[#FF6B00]/30 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>โครงการ Active Recruitment SIT มจธ. ปีการศึกษา 2570</span>
-            </span>
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#35D5F2]/20 text-[#35D5F2] border border-[#35D5F2]/30">
-              เกณฑ์ผ่านการสอบ ≥ 50%
-            </span>
-          </div>
+      <AnimatedContent distance={40} direction="vertical" duration={0.7} trigger="mount">
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#121A2F] via-[#0F172A] to-[#0A0F1D] border border-[var(--border-color)] p-6 sm:p-10 shadow-2xl">
+          <div className="relative z-10 max-w-3xl space-y-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#FF6B00]/20 text-[#FF8A33] border border-[#FF6B00]/30 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{programBadge}</span>
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#35D5F2]/20 text-[#35D5F2] border border-[#35D5F2]/30">
+                เกณฑ์ผ่านการสอบ ≥ 50%
+              </span>
+            </div>
 
-          <div className="space-y-2">
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-              KMUTT_DSI <span className="bg-gradient-to-r from-[#FF6B00] via-[#FF8A33] to-[#35D5F2] bg-clip-text text-transparent">เตรียมตัวสอบ</span>
-            </h1>
-            <p className="text-sm sm:text-base text-[#A7B2C8] leading-relaxed">
-              คู่มือติวเข้มและระบบข้อสอบจำลองเสมือนจริง ออกแบบมาเพื่อปูพื้นฐาน (Basic) ให้แน่นที่สุด ครอบคลุมทั้งเนื้อหาคู่มือสอบทางการ (RAID, Algorithms, Networking, TCP) และ 4 เสาหลักการทดสอบสมรรถนะเทคโนโลยีดิจิทัลของคณะ SIT มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <button
-              onClick={() => onSelectTab('reading')}
-              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#FF6B00] to-[#FF8A33] text-white font-bold text-xs sm:text-sm shadow-lg hover:shadow-[#FF6B00]/25 hover:opacity-95 active:scale-95 transition-all flex items-center gap-2"
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>เริ่มอ่านบทเรียน ({STUDY_TOPICS.length} บท)</span>
-            </button>
-
-            <button
-              onClick={() => onSelectTab('exam')}
-              className="px-6 py-3.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] hover:border-[#35D5F2]/50 text-white font-bold text-xs sm:text-sm transition-all flex items-center gap-2"
-            >
-              <Award className="w-4 h-4 text-[#35D5F2]" />
-              <span>ทำข้อสอบจำลอง ({PRACTICE_QUESTIONS.length} ข้อ)</span>
-            </button>
-
-            <button
-              onClick={onOpenSlidesModal}
-              className="px-5 py-3.5 rounded-2xl bg-[#080D1A] border border-[var(--border-color)] text-[#A7B2C8] hover:text-white text-xs font-semibold transition-all flex items-center gap-2"
-            >
-              <span>ดูสไลด์ชี้แจงทางการ 7 สไลด์</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Ambient background decoration */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#FF6B00]/15 via-[#35D5F2]/10 to-transparent blur-3xl pointer-events-none" />
-      </section>
-
-      {/* Resume Reading & Stats Section */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Resume Card (2 cols) */}
-        {lastReadTopic && (
-          <div className="md:col-span-2 p-6 sm:p-7 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-4 shadow-sm flex flex-col justify-between">
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-[#FF6B00] flex items-center gap-1.5 uppercase tracking-wider">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>อ่านต่อจากจุดเดิม</span>
-                </span>
-                <span className="text-[var(--text-muted)] font-mono">
-                  บทที่ {lastReadTopic.lessonNumber} / {STUDY_TOPICS.length}
-                </span>
-              </div>
-              <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] leading-snug">
-                {lastReadTopic.title}
-              </h3>
-              <p className="text-xs text-[var(--text-secondary)] line-clamp-2">
-                {lastReadTopic.description}
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+                KMUTT_{activeProgram} <span className={`bg-gradient-to-r ${programAccentColor} bg-clip-text text-transparent`}>เตรียมตัวสอบ</span>
+              </h1>
+              <p className="text-sm sm:text-base text-[#A7B2C8] leading-relaxed">
+                {isIT 
+                  ? 'คู่มือติวเข้มและระบบข้อสอบจำลอง วท.บ. เทคโนโลยีสารสนเทศ (IT) SIT มจธ. ปูพื้นฐานลึก Hardware, OS, Number Systems, SDLC, Database, Network, Cloud & Security พร้อมข้อสอบ 15 ข้อทางการ'
+                  : isCS
+                  ? 'คู่มือติวเข้มและระบบข้อสอบจำลอง วท.บ. วิทยาการคอมพิวเตอร์ (CS English Program) SIT มจธ. ปูพื้นฐาน Discrete Math, Data Structures, Algorithms & Big-O, AI/ML, Software Eng พร้อมข้อสอบ 15 ข้อทางการ'
+                  : 'คู่มือติวเข้มและระบบข้อสอบจำลองเสมือนจริง ออกแบบมาเพื่อปูพื้นฐาน (Basic) ให้แน่นที่สุด ครอบคลุมทั้งเนื้อหาคู่มือสอบทางการ (RAID, Algorithms, Networking, TCP) และ 4 เสาหลักการทดสอบสมรรถนะเทคโนโลยีดิจิทัลของคณะ SIT มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี'
+                }
               </p>
             </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <button
+                onClick={() => onSelectTab('reading')}
+                className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#FF6B00] to-[#FF8A33] text-white font-bold text-xs sm:text-sm shadow-lg hover:shadow-[#FF6B00]/25 hover:opacity-95 active:scale-95 transition-all flex items-center gap-2"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>เริ่มอ่านบทเรียน ({allTopics.length} บท)</span>
+              </button>
+
+              <button
+                onClick={() => onSelectTab('exam')}
+                className="px-6 py-3.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] hover:border-[#35D5F2]/50 text-white font-bold text-xs sm:text-sm transition-all flex items-center gap-2"
+              >
+                <Award className="w-4 h-4 text-[#35D5F2]" />
+                <span>ทำข้อสอบจำลอง ({totalQuestions} ข้อ)</span>
+              </button>
+
+              <button
+                onClick={onOpenSlidesModal}
+                className="px-5 py-3.5 rounded-2xl bg-[#080D1A] border border-[var(--border-color)] text-[#A7B2C8] hover:text-white text-xs font-semibold transition-all flex items-center gap-2"
+              >
+                <span>ดูสไลด์ชี้แจงทางการ 7 สไลด์</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Ambient background decoration */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#FF6B00]/15 via-[#35D5F2]/10 to-transparent blur-3xl pointer-events-none" />
+        </section>
+      </AnimatedContent>
+
+      {/* Resume Reading & Stats Section */}
+      <AnimatedContent distance={30} direction="vertical" duration={0.6} delay={0.1}>
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Resume Card (2 cols) */}
+          {lastReadTopic && (
+            <div className="md:col-span-2 p-6 sm:p-7 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-4 shadow-sm flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-[#FF6B00] flex items-center gap-1.5 uppercase tracking-wider">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>อ่านต่อจากจุดเดิม</span>
+                  </span>
+                  <span className="text-[var(--text-muted)] font-mono">
+                    บทที่ {lastReadTopic.lessonNumber} / {allTopics.length}
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] leading-snug">
+                  {lastReadTopic.title}
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)] line-clamp-2">
+                  {lastReadTopic.description}
+                </p>
+              </div>
 
             <div className="pt-3 border-t border-[var(--border-color)] flex items-center justify-between gap-4">
               <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
@@ -235,128 +265,150 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </button>
         </div>
       </section>
+      </AnimatedContent>
 
       {/* 4 Pillars Section */}
-      <section className="space-y-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg sm:text-xl font-black text-[var(--text-primary)]">
-              4 เสาหลักการทดสอบสมรรถนะเทคโนโลยีดิจิทัล
-            </h2>
-            <p className="text-xs text-[var(--text-muted)]">
-              อิงตามประกาศโครงการ Active Recruitment คณะ SIT มจธ. (เกณฑ์ผ่าน 50%)
-            </p>
+      <AnimatedContent distance={30} direction="vertical" duration={0.6}>
+        <section className="space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg sm:text-xl font-black text-[var(--text-primary)]">
+                4 เสาหลักการทดสอบสมรรถนะเทคโนโลยีดิจิทัล
+              </h2>
+              <p className="text-xs text-[var(--text-muted)]">
+                อิงตามประกาศโครงการ Active Recruitment คณะ SIT มจธ. (เกณฑ์ผ่าน 50%)
+              </p>
+            </div>
+            <button
+              onClick={() => onSelectTab('library')}
+              className="text-xs font-bold text-[#FF6B00] hover:underline flex items-center gap-1"
+            >
+              <span>ดูทั้งหมด</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <button
-            onClick={() => onSelectTab('library')}
-            className="text-xs font-bold text-[#FF6B00] hover:underline flex items-center gap-1"
-          >
-            <span>ดูทั้งหมด</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {pillarCards.map(pillar => {
-            const Icon = pillar.icon;
-            return (
-              <div
-                key={pillar.id}
-                onClick={() => {
-                  onSelectCategoryFilter(pillar.id);
-                  onSelectTab('library');
-                }}
-                className="p-6 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[#FF6B00]/40 transition-all shadow-sm space-y-4 cursor-pointer group flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105"
-                    style={{ backgroundColor: `${pillar.color}15`, color: pillar.color }}
-                  >
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-[var(--text-primary)] group-hover:text-[#FF8A33] transition-colors">
-                      {pillar.titleTh}
-                    </h3>
-                    <div className="text-[11px] font-mono text-[var(--text-muted)]">
-                      {pillar.titleEn}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {pillarCards.map(pillar => {
+              const Icon = pillar.icon;
+              return (
+                <div
+                  key={pillar.id}
+                  onClick={() => {
+                    onSelectCategoryFilter(pillar.id);
+                    onSelectTab('library');
+                  }}
+                  className="p-6 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[#FF6B00]/40 transition-all shadow-sm space-y-4 cursor-pointer group flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105"
+                      style={{ backgroundColor: `${pillar.color}15`, color: pillar.color }}
+                    >
+                      <Icon className="w-6 h-6" />
                     </div>
+                    <div>
+                      <h3 className="text-base font-bold text-[var(--text-primary)] group-hover:text-[#FF8A33] transition-colors">
+                        {pillar.titleTh}
+                      </h3>
+                      <div className="text-[11px] font-mono text-[var(--text-muted)]">
+                        {pillar.titleEn}
+                      </div>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                      {pillar.desc}
+                    </p>
                   </div>
-                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                    {pillar.desc}
-                  </p>
-                </div>
 
-                <div className="pt-3 border-t border-[var(--border-color)] flex items-center justify-between text-xs text-[var(--text-muted)]">
-                  <span>{pillar.topicIds.length} บทเรียน</span>
-                  <span className="font-semibold text-[#FF8A33] group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                    <span>เปิดอ่าน</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </span>
+                  <div className="pt-3 border-t border-[var(--border-color)] flex items-center justify-between text-xs text-[var(--text-muted)]">
+                    <span>{pillar.topicIds.length} บทเรียน</span>
+                    <span className="font-semibold text-[#FF8A33] group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                      <span>เปิดอ่าน</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+              );
+            })}
+          </div>
+        </section>
+      </AnimatedContent>
 
       {/* Program Criteria Preview (IT, DSI, CS) */}
-      <section className="p-6 sm:p-8 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <span className="text-xs font-bold text-[#FF6B00] uppercase tracking-wider">
-              เกณฑ์คะแนนขั้นต่ำ โควตาเครือข่ายโรงเรียน SIT มจธ.
-            </span>
-            <h2 className="text-lg sm:text-xl font-black text-[var(--text-primary)] mt-1">
-              3 หลักสูตรที่เปิดรับสมัคร (เสนอชื่อไม่เกิน 3 คน/โรงเรียน)
-            </h2>
+      <AnimatedContent distance={30} direction="vertical" duration={0.6}>
+        <section className="p-6 sm:p-8 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span className="text-xs font-bold text-[#FF6B00] uppercase tracking-wider">
+                เกณฑ์คะแนนขั้นต่ำ โควตาเครือข่ายโรงเรียน SIT มจธ.
+              </span>
+              <h2 className="text-lg sm:text-xl font-black text-[var(--text-primary)] mt-1">
+                3 หลักสูตรที่เปิดรับสมัคร (เสนอชื่อไม่เกิน 3 คน/โรงเรียน)
+              </h2>
+            </div>
+
+            <button
+              onClick={() => onSelectTab('sit-guide')}
+              className="px-4 py-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] hover:border-[#FF6B00] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center gap-1.5"
+            >
+              <span>ดูรายละเอียด & กำหนดการ</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#FF6B00]" />
+            </button>
           </div>
 
-          <button
-            onClick={() => onSelectTab('sit-guide')}
-            className="px-4 py-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] hover:border-[#FF6B00] text-xs font-bold text-[var(--text-primary)] transition-all flex items-center gap-1.5"
-          >
-            <span>ดูรายละเอียด & กำหนดการ</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#FF6B00]" />
-          </button>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {SIT_PROGRAMS.map(prog => (
+              <div
+                key={prog.code}
+                className="p-5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] space-y-3 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className={`text-xl font-black font-mono ${
+                      prog.code === 'IT' ? 'text-[#35D5F2]' : prog.code === 'CS' ? 'text-[#8B7CFF]' : 'text-[#FF6B00]'
+                    }`}>
+                      {prog.code}
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] font-semibold">
+                      โควตา 2570
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[var(--text-primary)] line-clamp-1 mt-2">{prog.degreeNameTh}</h4>
+                    <p className="text-[11px] text-[var(--text-secondary)] mt-1">{prog.highlight}</p>
+                  </div>
+                </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {SIT_PROGRAMS.map(prog => (
-            <div
-              key={prog.code}
-              className="p-5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xl font-black text-[#FF6B00] font-mono">
-                  {prog.code}
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)] font-semibold">
-                  โควตา 2570
-                </span>
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-[var(--text-primary)] line-clamp-1">{prog.degreeNameTh}</h4>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">{prog.highlight}</p>
-              </div>
-              <div className="pt-2 border-t border-[var(--border-color)] grid grid-cols-3 gap-2 text-center text-xs">
-                <div className="p-1.5 rounded-lg bg-[var(--bg-card)]">
-                  <div className="text-[10px] text-[var(--text-muted)]">GPAX</div>
-                  <div className="font-bold text-[var(--text-primary)]">{prog.gpax.toFixed(2)}</div>
-                </div>
-                <div className="p-1.5 rounded-lg bg-[var(--bg-card)]">
-                  <div className="text-[10px] text-[var(--text-muted)]">GPA คณิต</div>
-                  <div className="font-bold text-[var(--text-primary)]">{prog.gpaMath.toFixed(2)}</div>
-                </div>
-                <div className="p-1.5 rounded-lg bg-[var(--bg-card)]">
-                  <div className="text-[10px] text-[var(--text-muted)]">GPA อังกฤษ</div>
-                  <div className="font-bold text-[var(--text-primary)]">{prog.gpaEng.toFixed(2)}</div>
+                <div className="space-y-3">
+                  <div className="pt-2 border-t border-[var(--border-color)] grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="p-1.5 rounded-lg bg-[var(--bg-card)]">
+                      <div className="text-[10px] text-[var(--text-muted)]">GPAX</div>
+                      <div className="font-bold text-[var(--text-primary)]">{prog.gpax.toFixed(2)}</div>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-[var(--bg-card)]">
+                      <div className="text-[10px] text-[var(--text-muted)]">GPA คณิต</div>
+                      <div className="font-bold text-[var(--text-primary)]">{prog.gpaMath.toFixed(2)}</div>
+                    </div>
+                    <div className="p-1.5 rounded-lg bg-[var(--bg-card)]">
+                      <div className="text-[10px] text-[var(--text-muted)]">GPA อังกฤษ</div>
+                      <div className="font-bold text-[var(--text-primary)]">{prog.gpaEng.toFixed(2)}</div>
+                    </div>
+                  </div>
+
+                  {onSelectProgram && (
+                    <button
+                      onClick={() => onSelectProgram(prog.code as ProgramId)}
+                      className="w-full py-2 rounded-xl text-xs font-bold bg-[var(--bg-card)] hover:bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-primary)] transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <span>เข้าเตรียมสอบ {prog.code}</span>
+                      <ArrowRight className="w-3 h-3 text-[#FF6B00]" />
+                    </button>
+                  )}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      </AnimatedContent>
 
       {/* Traps & Formulas Quick Teaser */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">

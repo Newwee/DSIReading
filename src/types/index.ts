@@ -1,3 +1,5 @@
+export type ProgramId = 'DSI' | 'IT' | 'CS';
+
 export type CategoryId = 
   | 'network-storage'
   | 'programming-algo'
@@ -116,7 +118,8 @@ export interface ReadingProgressState {
 
 export interface PracticeQuestion {
   id: number;
-  source: 'docx_official' | 'mock_exam' | 'sit_challenge' | 'docx_4pillars' | 'binary_basics';
+  qNum?: number;
+  source: 'docx_official' | 'mock_exam' | 'sit_challenge' | 'docx_4pillars' | 'binary_basics' | 'it_official' | 'cs_official';
   category: CategoryId;
   question: string;
   options: { label: string; text: string }[];

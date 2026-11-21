@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { GradientText } from './ui/GradientText';
 
+import { ProgramId } from '../types';
+
 export type NavTab = 
   | 'home' 
   | 'library' 
@@ -36,6 +38,9 @@ interface HeaderProps {
   bookmarkedCount: number;
   flaggedCount: number;
   visible?: boolean;
+  activeProgram?: ProgramId;
+  onSelectProgram?: (prog: ProgramId) => void;
+  questionCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -47,14 +52,21 @@ export const Header: React.FC<HeaderProps> = ({
   bookmarkedCount,
   flaggedCount,
   visible = true,
+  activeProgram = 'DSI',
+  onSelectProgram,
+  questionCount,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const isIT = activeProgram === 'IT';
+  const isCS = activeProgram === 'CS';
+  const programColor = isIT ? 'text-[#35D5F2]' : isCS ? 'text-[#8B7CFF]' : 'text-[#FF6B00]';
 
   const navItems: { id: NavTab; label: string; icon: React.ElementType; badge?: number; tag?: string }[] = [
     { id: 'home', label: 'แดชบอร์ด', icon: Layers },
     { id: 'library', label: 'คลังบทเรียน', icon: BookOpen },
     { id: 'reading', label: 'อ่านเตรียมสอบ', icon: FileText },
-    { id: 'exam', label: 'แบบทดสอบ', icon: Award, tag: '55 ข้อ' },
+    { id: 'exam', label: 'แบบทดสอบ', icon: Award, tag: questionCount ? `${questionCount} ข้อ` : 'ข้อสอบ' },
     { id: 'cheatsheet', label: 'สรุปจุดจำ & สูตร', icon: Flame, tag: 'HOT' },
     { id: 'flagged', label: 'จุดที่ติดธงไว้', icon: Flag, badge: flaggedCount },
     { id: 'sit-guide', label: 'โควตา SIT มจธ.', icon: GraduationCap, tag: '2570' },
@@ -75,26 +87,45 @@ export const Header: React.FC<HeaderProps> = ({
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
         {/* Logo & Brand */}
-        <button
-          onClick={() => handleNavClick('home')}
-          className="flex items-center gap-3 text-left group shrink-0"
-        >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#FF6B00] via-[#FF8A33] to-[#35D5F2] p-[1.5px] transition-transform duration-300 group-hover:scale-105 shadow-md">
-            <div className="w-full h-full bg-[#080D1A] rounded-[10px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-[#FF6B00]" />
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => handleNavClick('home')}
+            className="flex items-center gap-3 text-left group"
+          >
+            <div className={`w-10 h-10 rounded-xl p-[1.5px] transition-transform duration-300 group-hover:scale-105 shadow-md ${
+              isIT ? 'bg-gradient-to-tr from-[#00D2D3] to-[#35D5F2]' 
+              : isCS ? 'bg-gradient-to-tr from-[#8B7CFF] to-[#A78BFA]' 
+              : 'bg-gradient-to-tr from-[#FF6B00] via-[#FF8A33] to-[#35D5F2]'
+            }`}>
+              <div className="w-full h-full bg-[#080D1A] rounded-[10px] flex items-center justify-center">
+                <Sparkles className={`w-5 h-5 ${programColor}`} />
+              </div>
             </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-black tracking-wider uppercase text-[#FF6B00]">KMUTT SIT</span>
-              <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#35D5F2]/20 text-[#35D5F2] font-bold border border-[#35D5F2]/30">2570</span>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className={`text-[11px] font-black tracking-wider uppercase ${programColor}`}>
+                  KMUTT SIT
+                </span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#35D5F2]/20 text-[#35D5F2] font-bold border border-[#35D5F2]/30">2570</span>
+              </div>
+              <div className="text-sm font-black text-[var(--text-primary)] leading-tight flex items-center gap-1">
+                <span className={programColor}>KMUTT_{activeProgram}</span>
+                <span className="text-[#A7B2C8] font-normal text-xs">เตรียมตัวสอบ</span>
+              </div>
             </div>
-            <div className="text-sm font-black text-[var(--text-primary)] leading-tight flex items-center gap-1">
-              <span>KMUTT_DSI</span>
-              <span className="text-[#A7B2C8] font-normal text-xs">เตรียมตัวสอบ</span>
-            </div>
-          </div>
-        </button>
+          </button>
+
+          {/* Quick return to DSI button if in IT or CS */}
+          {activeProgram !== 'DSI' && onSelectProgram && (
+            <button
+              onClick={() => onSelectProgram('DSI')}
+              className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[#FF6B00] hover:border-[#FF6B00]/40 transition-all ml-2"
+              title="คลิกเพื่อสลับกลับสู่สาขาหลัก DSI"
+            >
+              <span>← กลับ DSI</span>
+            </button>
+          )}
+        </div>
 
         {/* Desktop Navigation Links */}
         <nav className="hidden lg:flex items-center gap-1">

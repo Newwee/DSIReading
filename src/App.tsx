@@ -16,10 +16,24 @@ import { FlaggedReviewView } from './views/FlaggedReviewView';
 import { SitGuideView } from './views/SitGuideView';
 import { BookmarksHistoryView } from './views/BookmarksHistoryView';
 
-import { CategoryId } from './types';
+import { CategoryId, ProgramId } from './types';
 import { STUDY_TOPICS } from './data/studyContent';
+import { getProgramTopics, getProgramQuestions } from './data/programs';
+
+const getInitialProgram = (): ProgramId => {
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname.toUpperCase();
+    if (path.includes('/IT')) return 'IT';
+    if (path.includes('/CS')) return 'CS';
+  }
+  return 'DSI';
+};
 
 export function App() {
+  const [activeProgram, setActiveProgram] = useState<ProgramId>(getInitialProgram);
+  const currentTopics = getProgramTopics(activeProgram);
+  const currentQuestions = getProgramQuestions(activeProgram);
+
   const {
     state,
     theme,
@@ -41,10 +55,22 @@ export function App() {
     getFlagNote,
   } = useStudyState();
 
-  const [currentTab, setCurrentTab] = useState<NavTab>('home');
-  const [selectedTopicId, setSelectedTopicId] = useState<string>(
-    state.lastReadTopicId || STUDY_TOPICS[0]?.id || ''
-  );
+  const [currentTab, setCurrentTab] = useState<NavTab>(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.toUpperCase();
+      if (path.includes('/IT') || path.includes('/CS')) return 'reading';
+    }
+    return 'home';
+  });
+
+  const [selectedTopicId, setSelectedTopicId] = useState<string>(() => {
+    const prog = getInitialProgram();
+    const topics = getProgramTopics(prog);
+    return state.lastReadTopicId && topics.some(t => t.id === state.lastReadTopicId)
+      ? state.lastReadTopicId
+      : (topics[0]?.id || '');
+  });
+
   const [libraryCategoryFilter, setLibraryCategoryFilter] = useState<CategoryId | 'all'>('all');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSlidesModalOpen, setIsSlidesModalOpen] = useState(false);
@@ -52,6 +78,40 @@ export function App() {
   const [isZenMode, setIsZenMode] = useState(false);
   const [isNavVisible, setIsNavVisible] = useState(true);
   const lastScrollYRef = useRef(0);
+
+  // Sync state when browser back/forward buttons are clicked
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname.toUpperCase();
+      let prog: ProgramId = 'DSI';
+      if (path.includes('/IT')) prog = 'IT';
+      else if (path.includes('/CS')) prog = 'CS';
+
+      setActiveProgram(prog);
+      const progTopics = getProgramTopics(prog);
+      if (progTopics.length > 0) {
+        setSelectedTopicId(progTopics[0].id);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Program selection handler
+  const handleSelectProgram = (program: ProgramId, targetTab: NavTab = 'reading') => {
+    setActiveProgram(program);
+    const targetUrl = program === 'DSI' ? '/' : `/${program}`;
+    if (window.location.pathname.toUpperCase() !== targetUrl.toUpperCase()) {
+      window.history.pushState(null, '', targetUrl);
+    }
+    const progTopics = getProgramTopics(program);
+    if (progTopics.length > 0) {
+      setSelectedTopicId(progTopics[0].id);
+    }
+    setCurrentTab(targetTab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Auto-hide navigation on mobile scroll down, reveal on scroll up
   useEffect(() => {
@@ -114,6 +174,9 @@ export function App() {
         bookmarkedCount={state.bookmarkedTopicIds.length}
         flaggedCount={state.flaggedItems?.length || 0}
         visible={showNav}
+        activeProgram={activeProgram}
+        onSelectProgram={handleSelectProgram}
+        questionCount={currentQuestions.length}
       />
 
       {/* Views Container */}
@@ -131,6 +194,10 @@ export function App() {
             flaggedCount={state.flaggedItems?.length || 0}
             lastReadTopicId={state.lastReadTopicId}
             onOpenSlidesModal={() => setIsSlidesModalOpen(true)}
+            activeProgram={activeProgram}
+            onSelectProgram={handleSelectProgram}
+            topics={currentTopics}
+            questionsCount={currentQuestions.length}
           />
         )}
 
@@ -143,6 +210,8 @@ export function App() {
             isCompleted={isCompleted}
             isFlagged={isFlagged}
             onToggleBookmark={toggleBookmark}
+            topics={currentTopics}
+            activeProgram={activeProgram}
           />
         )}
 
@@ -167,6 +236,8 @@ export function App() {
             onChangeReadingWidth={setReadingWidth}
             isZenMode={isZenMode}
             onToggleZenMode={() => setIsZenMode(prev => !prev)}
+            topics={currentTopics}
+            activeProgram={activeProgram}
           />
         )}
 
@@ -177,6 +248,8 @@ export function App() {
             getFlagNote={getFlagNote}
             onSaveFlag={toggleFlag}
             onRemoveFlag={removeFlag}
+            questions={currentQuestions}
+            activeProgram={activeProgram}
           />
         )}
 
@@ -198,6 +271,8 @@ export function App() {
           <SitGuideView
             onOpenSlidesModal={() => setIsSlidesModalOpen(true)}
             onOpenTopic={handleOpenTopic}
+            currentProgram={activeProgram}
+            onSelectProgram={p => handleSelectProgram(p, 'reading')}
           />
         )}
 
