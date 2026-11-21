@@ -39,7 +39,7 @@ export const CATEGORIES: CategoryInfo[] = [
     description: 'กฎหมายคุ้มครองข้อมูลส่วนบุคคล (PDPA), พ.ร.บ. คอมพิวเตอร์, การตรวจสอบข่าวปลอม (Fake News), ลิขสิทธิ์ และ Digital Footprint',
     color: '#53DBAB',
     gradient: 'from-[#10B981] to-[#53DBAB]',
-    topicsCount: 1,
+    topicsCount: 2,
   },
   {
     id: 'problem-solving',

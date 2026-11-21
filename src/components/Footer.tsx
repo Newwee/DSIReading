@@ -45,7 +45,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
                   onClick={() => onSelectTab('library')}
                   className="text-[var(--text-secondary)] hover:text-[#FF6B00] transition-colors"
                 >
-                  คลังบทเรียน 14 หัวข้อ
+                  คลังบทเรียน 15 หัวข้อ
                 </button>
               </li>
               <li>

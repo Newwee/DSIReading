@@ -26,6 +26,7 @@ import {
 import { StudyTopic, CategoryId, FlaggedItem } from '../types';
 import { CATEGORIES, STUDY_TOPICS, getTopicById } from '../data/studyContent';
 import { FlagModal } from '../components/FlagModal';
+import { MarkdownRenderer } from '../components/ui/MarkdownRenderer';
 
 interface ReadingPageViewProps {
   currentTopicId?: string;
@@ -187,7 +188,7 @@ export const ReadingPageView: React.FC<ReadingPageViewProps> = ({
             className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl bg-[var(--bg-elevated)] text-[var(--text-primary)] min-h-[38px]"
           >
             <BookOpen className="w-3.5 h-3.5 text-[#FF6B00]" />
-            <span>บทที่ ({activeTopic.lessonNumber}/14)</span>
+            <span>บทที่ ({activeTopic.lessonNumber}/{STUDY_TOPICS.length})</span>
           </button>
 
           <span className="text-xs font-mono text-[#FF6B00] font-bold">
@@ -223,7 +224,7 @@ export const ReadingPageView: React.FC<ReadingPageViewProps> = ({
                     สารบัญบทเรียน
                   </span>
                   <span className="text-xs px-2 py-0.5 rounded-full bg-[#FF6B00]/15 font-bold text-[#FF8A33]">
-                    14 บท
+                    {STUDY_TOPICS.length} บท
                   </span>
                 </div>
 
@@ -446,8 +447,8 @@ export const ReadingPageView: React.FC<ReadingPageViewProps> = ({
                     )}
 
                     {/* Section Text Content */}
-                    <div className="text-[var(--text-secondary)] leading-relaxed whitespace-pre-line space-y-4">
-                      {section.content}
+                    <div className="text-[var(--text-secondary)] leading-relaxed space-y-4">
+                      <MarkdownRenderer content={section.content} />
                     </div>
 
                     {/* ASCII Diagram (if any) */}
@@ -654,7 +655,7 @@ export const ReadingPageView: React.FC<ReadingPageViewProps> = ({
           <div onClick={() => setLeftSidebarOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="fixed inset-y-0 left-0 w-4/5 max-w-sm bg-[var(--bg-card)] border-r border-[var(--border-color)] p-5 space-y-4 overflow-y-auto animate-fade-in z-10">
             <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
-              <span className="text-sm font-bold text-[var(--text-primary)]">เลือกบทเรียน (14 บท)</span>
+              <span className="text-sm font-bold text-[var(--text-primary)]">เลือกบทเรียน ({STUDY_TOPICS.length} บท)</span>
               <button onClick={() => setLeftSidebarOpen(false)} className="p-1 rounded-lg hover:bg-[var(--bg-elevated)]">
                 <X className="w-4 h-4 text-[var(--text-muted)]" />
               </button>

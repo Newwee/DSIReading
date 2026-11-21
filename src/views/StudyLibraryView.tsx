@@ -68,7 +68,7 @@ export const StudyLibraryView: React.FC<StudyLibraryViewProps> = ({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[#FF6B00]/15 text-[#FF8A33] border border-[#FF6B00]/30">
-                คลังบทเรียนครบวงจร (14 บท)
+                คลังบทเรียนครบวงจร ({STUDY_TOPICS.length} บท)
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
@@ -133,7 +133,7 @@ export const StudyLibraryView: React.FC<StudyLibraryViewProps> = ({
                 : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
             }`}
           >
-            ทุกหมวดหมู่ (14)
+            ทุกหมวดหมู่ ({STUDY_TOPICS.length})
           </button>
           {CATEGORIES.map(cat => (
             <button

@@ -116,7 +116,7 @@ export interface ReadingProgressState {
 
 export interface PracticeQuestion {
   id: number;
-  source: 'docx_official' | 'mock_exam' | 'sit_challenge';
+  source: 'docx_official' | 'mock_exam' | 'sit_challenge' | 'docx_4pillars' | 'binary_basics';
   category: CategoryId;
   question: string;
   options: { label: string; text: string }[];

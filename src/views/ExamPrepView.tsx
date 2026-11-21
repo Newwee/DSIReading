@@ -13,7 +13,12 @@ import {
   Check,
   ChevronRight
 } from 'lucide-react';
-import { PRACTICE_QUESTIONS, getOfficialDocxQuestions } from '../data/practiceQuestions';
+import { 
+  PRACTICE_QUESTIONS, 
+  getOfficialDocxQuestions,
+  getFourPillarsQuestions,
+  getBinaryQuestions
+} from '../data/practiceQuestions';
 import { PracticeQuestion, CategoryId, FlaggedItem } from '../types';
 import { FlagModal } from '../components/FlagModal';
 
@@ -32,7 +37,7 @@ export const ExamPrepView: React.FC<ExamPrepViewProps> = ({
   onSaveFlag,
   onRemoveFlag,
 }) => {
-  const [filterMode, setFilterMode] = useState<'all' | 'docx' | 'flagged'>('docx');
+  const [filterMode, setFilterMode] = useState<'all' | '4pillars' | 'binary' | 'docx' | 'flagged'>('all');
   const [selectedCategory, setSelectedCategory] = useState<CategoryId | 'all'>('all');
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [revealedExplanations, setRevealedExplanations] = useState<Record<number, boolean>>({});
@@ -56,6 +61,10 @@ export const ExamPrepView: React.FC<ExamPrepViewProps> = ({
 
   if (filterMode === 'docx') {
     displayedQuestions = getOfficialDocxQuestions();
+  } else if (filterMode === '4pillars') {
+    displayedQuestions = getFourPillarsQuestions();
+  } else if (filterMode === 'binary') {
+    displayedQuestions = getBinaryQuestions();
   } else if (filterMode === 'flagged') {
     displayedQuestions = PRACTICE_QUESTIONS.filter(q => isFlagged(`quiz_${q.id}`));
   }
@@ -149,7 +158,31 @@ export const ExamPrepView: React.FC<ExamPrepViewProps> = ({
         {/* Filter Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
           {/* Main filter mode */}
-          <div className="flex items-center rounded-2xl bg-[var(--bg-card)] p-1 border border-[var(--border-color)]">
+          <div className="flex flex-wrap items-center rounded-2xl bg-[var(--bg-card)] p-1 border border-[var(--border-color)] gap-1">
+            <button
+              onClick={() => setFilterMode('all')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                filterMode === 'all' ? 'bg-[#FF6B00] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              ทั้งหมด ({PRACTICE_QUESTIONS.length} ข้อ)
+            </button>
+            <button
+              onClick={() => setFilterMode('4pillars')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                filterMode === '4pillars' ? 'bg-[#FF6B00] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              4 เสาหลัก (80 ข้อ)
+            </button>
+            <button
+              onClick={() => setFilterMode('binary')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                filterMode === 'binary' ? 'bg-[#35D5F2] text-black font-extrabold shadow-sm' : 'text-[var(--text-muted)] hover:text-[#35D5F2]'
+              }`}
+            >
+              เลขฐาน 2 & 8-Bit (15 ข้อ)
+            </button>
             <button
               onClick={() => setFilterMode('docx')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
@@ -157,14 +190,6 @@ export const ExamPrepView: React.FC<ExamPrepViewProps> = ({
               }`}
             >
               ข้อสอบทางการ 25 ข้อ (Docx)
-            </button>
-            <button
-              onClick={() => setFilterMode('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                filterMode === 'all' ? 'bg-[#FF6B00] text-white shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              ข้อสอบรวมทั้งหมด (55 ข้อ)
             </button>
             <button
               onClick={() => setFilterMode('flagged')}

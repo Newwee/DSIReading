@@ -142,7 +142,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#FF6B00] to-[#FF8A33] text-white font-bold text-xs sm:text-sm shadow-lg hover:shadow-[#FF6B00]/25 hover:opacity-95 active:scale-95 transition-all flex items-center gap-2"
             >
               <BookOpen className="w-4 h-4" />
-              <span>เริ่มอ่านบทเรียน (14 บท)</span>
+              <span>เริ่มอ่านบทเรียน ({STUDY_TOPICS.length} บท)</span>
             </button>
 
             <button
@@ -150,7 +150,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               className="px-6 py-3.5 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-color)] hover:border-[#35D5F2]/50 text-white font-bold text-xs sm:text-sm transition-all flex items-center gap-2"
             >
               <Award className="w-4 h-4 text-[#35D5F2]" />
-              <span>ทำข้อสอบจำลอง (55 ข้อ)</span>
+              <span>ทำข้อสอบจำลอง ({PRACTICE_QUESTIONS.length} ข้อ)</span>
             </button>
 
             <button
@@ -179,7 +179,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <span>อ่านต่อจากจุดเดิม</span>
                 </span>
                 <span className="text-[var(--text-muted)] font-mono">
-                  บทที่ {lastReadTopic.lessonNumber} / 14
+                  บทที่ {lastReadTopic.lessonNumber} / {STUDY_TOPICS.length}
                 </span>
               </div>
               <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] leading-snug">

@@ -111,7 +111,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         <div className="max-h-[60vh] overflow-y-auto p-4 space-y-4">
           {!cleanQuery ? (
             <div className="py-8 text-center text-xs text-[var(--text-muted)]">
-              พิมพ์คำค้นหาเพื่อสำรวจบทเรียน 14 หัวข้อ, ข้อสอบ 55 ข้อ และตารางกับดัก
+              พิมพ์คำค้นหาเพื่อสำรวจบทเรียน 15 หัวข้อ, ข้อสอบ 150 ข้อ และตารางกับดัก
             </div>
           ) : (
             <>
